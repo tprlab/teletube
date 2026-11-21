@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS `ChannelRecord` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `available` INTEGER NOT NULL, `archived` INTEGER NOT NULL, PRIMARY KEY(`id`));
+CREATE TABLE IF NOT EXISTS `ScanSettings` (`key` INTEGER NOT NULL, `allChannels` INTEGER NOT NULL, PRIMARY KEY(`key`));
+CREATE TABLE IF NOT EXISTS `SelectedChannel` (`channelId` INTEGER NOT NULL, PRIMARY KEY(`channelId`));
+CREATE TABLE IF NOT EXISTS `HiddenChannel` (`channelId` INTEGER NOT NULL, PRIMARY KEY(`channelId`));
+CREATE TABLE IF NOT EXISTS `ScanProgress` (`channelId` INTEGER NOT NULL, `newest` INTEGER NOT NULL, `pendingHead` INTEGER NOT NULL, `pendingCursor` INTEGER NOT NULL, `initialCutoff` INTEGER, `olderCursor` INTEGER NOT NULL, `historyComplete` INTEGER NOT NULL, `lastSynced` INTEGER NOT NULL, PRIMARY KEY(`channelId`));
+CREATE TABLE IF NOT EXISTS `VideoPost` (`channelId` INTEGER NOT NULL, `messageId` INTEGER NOT NULL, `videoId` TEXT NOT NULL, `postedAt` INTEGER NOT NULL, `url` TEXT NOT NULL, `title` TEXT NOT NULL, PRIMARY KEY(`channelId`, `messageId`, `videoId`));
+CREATE INDEX IF NOT EXISTS `index_VideoPost_postedAt` ON `VideoPost` (`postedAt`);
+CREATE INDEX IF NOT EXISTS `index_VideoPost_channelId_postedAt` ON `VideoPost` (`channelId`, `postedAt`);
+CREATE TABLE IF NOT EXISTS `Playback` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `videoId` TEXT NOT NULL, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `channelTitle` TEXT NOT NULL, `playedAt` INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS `index_Playback_videoId` ON `Playback` (`videoId`);
+CREATE INDEX IF NOT EXISTS `index_Playback_playedAt` ON `Playback` (`playedAt`);
+CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT);
+INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7b85a5fa1aed4ac0461c2a384c1abb11');
+
+INSERT INTO ChannelRecord VALUES (1, 'First channel', 1, 0);
+INSERT INTO ChannelRecord VALUES (2, 'Second channel', 1, 1);
+INSERT INTO ScanSettings VALUES (0, 0);
+INSERT INTO SelectedChannel VALUES (1), (2);
+INSERT INTO ScanProgress VALUES (1, 10, 0, 0, NULL, 10, 0, 150);
+INSERT INTO VideoPost VALUES (1, 10, 'dQw4w9WgXcQ', 100, 'https://youtu.be/dQw4w9WgXcQ', 'First');
+INSERT INTO VideoPost VALUES (2, 20, 'aqz-KE-bpKQ', 200, 'https://youtu.be/aqz-KE-bpKQ', 'Second');
+INSERT INTO Playback (videoId, url, title, channelTitle, playedAt) VALUES ('dQw4w9WgXcQ', 'https://youtu.be/dQw4w9WgXcQ', 'First', 'First channel', 10000);

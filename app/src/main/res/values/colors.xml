@@ -1,0 +1,5 @@
+<resources>
+    <color name="teletube_logo_background">#DCBEFD</color>
+    <color name="teletube_window_background">#FAF7FE</color>
+    <bool name="teletube_light_window">true</bool>
+</resources>
