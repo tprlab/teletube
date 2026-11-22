@@ -1,0 +1,83 @@
+name: Build release APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    environment: release
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out selected revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Assemble release APK
+        env:
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+        run: |
+          if [[ ! "$TELEGRAM_API_ID" =~ ^[1-9][0-9]{0,9}$ || ! "$TELEGRAM_API_HASH" =~ ^[a-fA-F0-9]{32}$ ]]; then
+            echo "::error::Set valid TELEGRAM_API_ID and TELEGRAM_API_HASH secrets in the release environment."
+            exit 1
+          fi
+
+          export JAVA_HOME="$JAVA_HOME_17_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          test ! -e local.properties
+          umask 077
+          trap 'rm -f local.properties' EXIT
+          printf 'telegram.apiId=%s\ntelegram.apiHash=%s\n' "$TELEGRAM_API_ID" "$TELEGRAM_API_HASH" > local.properties
+          unset TELEGRAM_API_ID TELEGRAM_API_HASH
+          ./gradlew --no-daemon :app:testReleaseUnitTest :app:assembleRelease
+
+      - name: Sign and verify APK
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          : "${ANDROID_KEYSTORE_BASE64:?Set the release keystore secret}"
+          : "${ANDROID_KEYSTORE_PASSWORD:?Set the release keystore password secret}"
+          : "${ANDROID_KEY_ALIAS:?Set the release key alias secret}"
+          : "${ANDROID_KEY_PASSWORD:?Set the release key password secret}"
+
+          export JAVA_HOME="$JAVA_HOME_17_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          tools="$ANDROID_HOME/build-tools/35.0.0"
+          signing_dir=$(mktemp -d "$RUNNER_TEMP/teletube-signing.XXXXXX")
+          trap 'rm -rf "$signing_dir"' EXIT
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$signing_dir/release.keystore"
+          unset ANDROID_KEYSTORE_BASE64
+
+          mkdir -p release
+          "$tools/zipalign" -P 16 -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$signing_dir/aligned.apk"
+          "$tools/apksigner" sign \
+            --ks "$signing_dir/release.keystore" --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD \
+            --v4-signing-enabled false \
+            --out release/teletube-release.apk "$signing_dir/aligned.apk"
+          "$tools/apksigner" verify release/teletube-release.apk
+          "$tools/zipalign" -c -P 16 4 release/teletube-release.apk
+          cd release
+          sha256sum teletube-release.apk > teletube-release.apk.sha256
+
+      - name: Upload verified APK and checksum
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: teletube-release
+          path: |
+            release/teletube-release.apk
+            release/teletube-release.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
