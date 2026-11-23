@@ -12,6 +12,10 @@ Then it clicked. I could vibe-code a little app that does the same thing with my
 
 Done!
 
+[View the TeleTube screenshot](teletube-announcement-v2.png)
+
+*All channel and topic names are AI-generated.*
+
 ## Run on Android
 
 1. Assume Telegram is installed. TeleTube requires Android 8.0 or newer.
