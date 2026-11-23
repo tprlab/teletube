@@ -59,6 +59,6 @@ If you have a release keystore, you can send it directly to GitHub with `base64 
 
 Once the workflow is on the default branch, open **Actions → Build release APK → Run workflow** and select `main`. To build a specific version tag that contains the workflow, run `gh workflow run release-apk.yml --ref v0.1.0`.
 
-The run produces a `teletube-release` artifact with the signed APK and its SHA-256 checksum. Test the APK before attaching both files to a GitHub Release. Increment `versionCode` for each app update.
+The run produces a `teletube-release` artifact with the signed APK and its SHA-256 checksum. Test the APK before attaching both files and the [third-party notices for TDLib and OpenSSL](THIRD_PARTY_NOTICES.txt) to a GitHub Release. Increment `versionCode` for each app update.
 
 Anyone with access to the APK can extract the embedded Telegram API credentials. The signing keystore and passwords are used only to sign the APK.
