@@ -12,7 +12,7 @@ Then it clicked. I could vibe-code a little app that does the same thing with my
 
 Done!
 
-[View the TeleTube screenshot](teletube-announcement-v2.png)
+![TeleTube feed with example tech and startup posts](teletube-announcement-v2.png)
 
 *All channel and topic names are AI-generated.*
 
