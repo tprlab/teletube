@@ -1,0 +1,1 @@
+Prepared TeleTube for F-Droid distribution. The F-Droid build guides you through entering your Telegram API ID and hash before signing in.

@@ -1,0 +1,5 @@
+TeleTube uses the Telegram API to find YouTube links in broadcast channels you’ve joined, including archived channels. Scan all your channels or choose the ones you want, then browse links by the date of the original Telegram post.
+
+Filter the feed by channel, hide videos you’ve already watched, or revisit videos in your viewing history. Open a video in another app or jump to its original Telegram post.
+
+You’ll need a Telegram account, a Telegram-compatible app installed on this device, and an API ID and hash from my.telegram.org/apps. Your session, feed, and viewing history are stored on this device. The listing screenshot shows example posts.
